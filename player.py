@@ -2,11 +2,13 @@ import pygame
 
 
 class Player:
-    def __init__(self):
-        self.image = pygame.image.load("images/jeremy.png")
-        self.image = pygame.transform.scale(self.image, (115, 115))
-        self.x = 0
-        self.y = 0
+    def __init__(self, selected_image, x, y):
+        self.image_file = pygame.image.load(
+            "images/" + selected_image + ".png")
+        self.image = pygame.transform.scale(self.image_file, (115, 115))
+        self.surface_string = pygame.image.tostring(self.image, 'RGBA')
+        self.x = x
+        self.y = y
         self.vel_x = 0
         self.vel_y = 0
         self.velocity = 5
