@@ -1,31 +1,50 @@
+# server.py
 import socket
+import pickle
+import pygame
+import threading
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Create the server socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('localhost', 12345))
+server_socket.listen()
 
-# Bind the socket to a specific address and port
-server_address = ('localhost', 10000)
-print(f"Starting up on {server_address}")
-sock.bind(server_address)
+# Initialize Pygame
+pygame.init()
 
-# Listen for incoming connections
-sock.listen(1)
+# Accept a connection from a client
+client_socket, client_address = server_socket.accept()
+clients = []
+clients.append(client_socket)
+data = {"color": (0, 0, 0), "pressed_key": ""}
+package = pickle.dumps(data)
 
-while True:
-    # Wait for a connection
-    print("Waiting for a connection")
-    connection, client_address = sock.accept()
-    print(f"Connection from {client_address}")
+for client_socket in clients:
+    client_socket.send(package)
 
-    # Receive data in small chunks and retransmit it
-    data = connection.recv(16)
-    print(f"Received {data.decode()!r}")
-    if data:
-        print("Sending data back to the client")
-        connection.sendall(data)
-    else:
-        print("No data from client")
-        break
 
-    # Clean up the connection
-    connection.close()
+# Main loop for the Pygame window
+running = True
+while running:
+    for client_socket in clients:
+        data = client_socket.recv(4096)
+
+    decoded_data = pickle.loads(data)
+    if decoded_data["pressed_key"] == "w":
+        if decoded_data['color'] == (255, 255, 255):
+            decoded_data['color'] = (0, 0, 0)
+        else:
+            decoded_data['color'] = (255, 255, 255)
+        decoded_data["pressed_key"] = ""
+
+    package = pickle.dumps(decoded_data)
+    client_socket.sendall(package)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+
+client_socket.close()
+server_socket.close()
+pygame.quit()
