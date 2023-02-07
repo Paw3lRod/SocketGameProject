@@ -2,24 +2,24 @@
 import socket
 import pickle
 import pygame
-import threading
+from player import Player
 
 # Create the server socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('localhost', 12345))
+server_socket.bind(('0.0.0.0', 12345))
 server_socket.listen()
 
 # Initialize Pygame
 pygame.init()
 
-# Accept a connection from a client
+# Accept two connections from clients
 clients = []
 while len(clients) < 2:
     client_socket, client_address = server_socket.accept()
     clients.append(client_socket)
 
-main_data = {"color": (0, 0, 0), "pressed_key": "",
-             "player1": {}, "player2": {}, "sprites": []}
+main_data = {"user": "", "color": (0, 0, 0), "pressed_key": "",
+             "player1_data": {"x": 0, "y": 0}, "player2_data": {"x": 0, "y": 0}}
 package = pickle.dumps(main_data)
 
 for client_socket in clients:
@@ -37,21 +37,35 @@ while running:
         if data:
             decoded_data.append(pickle.loads(data))
 
-    for client_data in decoded_data:
-        sprites += client_data["sprites"]
-
-        if client_data["pressed_key"] == "w":
-            if client_data['color'] == (255, 255, 255):
+    for i in range(len(decoded_data)):
+        if decoded_data[i]["pressed_key"] == "l":
+            if decoded_data[i]['color'] == (255, 255, 255):
                 main_data['color'] = (0, 0, 0)
             else:
                 main_data['color'] = (255, 255, 255)
             main_data["pressed_key"] = ""
 
-    main_data["sprites"] = sprites
+        # makes player1 control player1 and player2 control player2
+        if i == 0:
+            main_data["player1_data"]["x"] = decoded_data[i]["player1_data"]["x"]
+            main_data["player1_data"]["y"] = decoded_data[i]["player1_data"]["y"]
+        elif i == 1:
+            main_data["player2_data"]["x"] = decoded_data[i]["player2_data"]["x"]
+            main_data["player2_data"]["y"] = decoded_data[i]["player2_data"]["y"]
 
-    package = pickle.dumps(main_data)
-    for client_socket in clients:
-        client_socket.sendall(package)
+    # send updates to clients
+    player1_data = {}
+    player1_data.update(main_data)
+    player2_data = {}
+    player2_data.update(main_data)
+
+    player1_data["user"] = "1"
+    player2_data["user"] = "2"
+    package1 = pickle.dumps(player1_data)
+    package2 = pickle.dumps(player2_data)
+
+    clients[0].sendall(package1)
+    clients[1].sendall(package2)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

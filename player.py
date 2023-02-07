@@ -6,7 +6,6 @@ class Player:
         self.image_file = pygame.image.load(
             "images/" + selected_image + ".png")
         self.image = pygame.transform.scale(self.image_file, (115, 115))
-        self.surface_string = pygame.image.tostring(self.image, 'RGBA')
         self.x = x
         self.y = y
         self.vel_x = 0
