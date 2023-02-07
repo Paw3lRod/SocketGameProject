@@ -33,7 +33,7 @@ while running:
     player2.y = decoded_data["player2_data"]["y"]
 
     selected_player = player1
-    selected_data = "player2_data"
+    selected_data = "player1_data"
 
     if decoded_data["user"] == "2":
         selected_player = player2
