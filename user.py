@@ -2,6 +2,7 @@
 import socket
 import pickle
 import pygame
+import math
 from player import Player
 
 # Connect to the server
@@ -44,23 +45,53 @@ while running:
         screen.blit(sprite.image, (sprite.x, sprite.y))
 
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_l:
-                decoded_data['pressed_key'] = "l"
         if event.type == pygame.QUIT:
             running = False
 
         # inputs
-        keys = pygame.key.get_pressed()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                selected_player.vel_y += -selected_player.velocity
+                selected_player.turn("up")
+            if event.key == pygame.K_DOWN:
+                selected_player.vel_y += selected_player.velocity
+                selected_player.turn("down")
+            if event.key == pygame.K_RIGHT:
+                selected_player.vel_x += selected_player.velocity
+                selected_player.turn("right")
+            if event.key == pygame.K_LEFT:
+                selected_player.vel_x += -selected_player.velocity
+                selected_player.turn("left")
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_UP:
+                selected_player.vel_y += selected_player.velocity
+            if event.key == pygame.K_DOWN:
+                selected_player.vel_y += -selected_player.velocity
+            if event.key == pygame.K_RIGHT:
+                selected_player.vel_x += -selected_player.velocity
+            if event.key == pygame.K_LEFT:
+                selected_player.vel_x += selected_player.velocity
 
+        # diagonal direction control
+        keys = pygame.key.get_pressed()
         if keys[pygame.K_UP]:
-            selected_player.y -= selected_player.velocity
-        if keys[pygame.K_DOWN]:
-            selected_player.y += selected_player.velocity
-        if keys[pygame.K_RIGHT]:
-            selected_player.x += selected_player.velocity
-        if keys[pygame.K_LEFT]:
-            selected_player.y -= selected_player.velocity
+            if keys[pygame.K_RIGHT]:
+                selected_player.turn("upright")
+            elif keys[pygame.K_LEFT]:
+                selected_player.turn("upleft")
+        elif keys[pygame.K_DOWN]:
+            if keys[pygame.K_RIGHT]:
+                selected_player.turn("downright")
+            elif keys[pygame.K_LEFT]:
+                selected_player.turn("downleft")
+        # stop player from moving when no keys are pressed
+        else:
+            selected_player.vel_y = 0
+        if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
+            selected_player.vel_x = 0
+
+    player1.update()
+    player2.update()
 
     pygame.display.update()
 

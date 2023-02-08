@@ -18,7 +18,7 @@ while len(clients) < 2:
     client_socket, client_address = server_socket.accept()
     clients.append(client_socket)
 
-main_data = {"user": "", "color": (0, 0, 0), "pressed_key": "",
+main_data = {"user": "", "color": (255, 255, 255), "pressed_key": "",
              "player1_data": {"x": 0, "y": 0}, "player2_data": {"x": 0, "y": 0}}
 package = pickle.dumps(main_data)
 
@@ -38,13 +38,6 @@ while running:
             decoded_data.append(pickle.loads(data))
 
     for i in range(len(decoded_data)):
-        if decoded_data[i]["pressed_key"] == "l":
-            if decoded_data[i]['color'] == (255, 255, 255):
-                main_data['color'] = (0, 0, 0)
-            else:
-                main_data['color'] = (255, 255, 255)
-            main_data["pressed_key"] = ""
-
         # makes player1 control player1 and player2 control player2
         if i == 0:
             main_data["player1_data"]["x"] = decoded_data[i]["player1_data"]["x"]

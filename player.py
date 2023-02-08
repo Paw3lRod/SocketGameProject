@@ -1,4 +1,5 @@
 import pygame
+import math
 
 
 class Player:
@@ -10,7 +11,7 @@ class Player:
         self.y = y
         self.vel_x = 0
         self.vel_y = 0
-        self.velocity = 5
+        self.velocity = 1
         self.directions = {"down": 0, "up": 180,
                            "right": 90, "left": -90, "upright": 135, "upleft": -135, "downright": 45, "downleft": -45}
         self.scales = {"down": (115, 115), "up": (
@@ -19,6 +20,27 @@ class Player:
             self.velocity, 0], "left": [-self.velocity, 0], "upright": [self.velocity, -self.velocity], "upleft": [-self.velocity, -self.velocity], "downright": [self.velocity, self.velocity], "downleft": [-self.velocity, self.velocity]}
 
     def update(self):
+        # check if velocity is too high
+        if self.vel_x > self.velocity:
+            self.vel_x = self.velocity
+        elif self.vel_x < -self.velocity:
+            self.vel_x = self.velocity
+        if self.vel_y > self.velocity:
+            self.vel_y = self.velocity
+        elif self.vel_y < -self.velocity:
+            self.vel_y = self.velocity
+
+        # check if player is heading diagonal
+        if self.vel_x != 0 and self.vel_y != 0:
+            if self.vel_x < 0:
+                self.vel_x = -math.sqrt((self.velocity ** 2) / 2)
+            else:
+                self.vel_x = math.sqrt((self.velocity ** 2) / 2)
+            if self.vel_y < 0:
+                self.vel_y = -math.sqrt((self.velocity ** 2) / 2)
+            else:
+                self.vel_y = math.sqrt((self.velocity ** 2) / 2)
+
         self.x += self.vel_x
         self.y += self.vel_y
 
