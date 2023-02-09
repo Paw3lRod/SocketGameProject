@@ -11,7 +11,7 @@ class Player:
         self.y = y
         self.vel_x = 0
         self.vel_y = 0
-        self.velocity = 1
+        self.velocity = 2
         self.directions = {"down": 0, "up": 180,
                            "right": 90, "left": -90, "upright": 135, "upleft": -135, "downright": 45, "downleft": -45}
         self.scales = {"down": (115, 115), "up": (
