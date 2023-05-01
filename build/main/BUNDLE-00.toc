@@ -1,3 +1,0 @@
-([('main',
-   '/Users/paywell/Documents/preUni/pythonHello/chatGPT/dist/main',
-   'EXECUTABLE')],)
