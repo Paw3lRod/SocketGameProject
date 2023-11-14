@@ -2,13 +2,11 @@
 import socket
 import pickle
 import pygame
-import math
 from player import Player
 
 # Connect to the server
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-client_socket.connect(('192.168.86.192', 12345))
+client_socket.connect(("127.0.0.1", 12345))
 
 # Initialize Pygame
 pygame.init()
@@ -85,9 +83,9 @@ while running:
                 selected_player.turn("downright")
             elif keys[pygame.K_LEFT]:
                 selected_player.turn("downleft")
-        # stop player from moving when no keys are pressed
         else:
             selected_player.vel_y = 0
+
         if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
             selected_player.vel_x = 0
 

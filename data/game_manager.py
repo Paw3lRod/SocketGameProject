@@ -16,20 +16,18 @@ class Game_manager:
         self.clock = pygame.time.Clock()
 
     def intro_menu(self):
-        button_play = Button(200, 60, "Play online", 26,
-                             (255, 112, 150), (0, 0))
-        button_customize = Button(
-            200, 60, "Customize", 26, (255, 112, 150), (0, 0))
-        button_practice = Button(
-            200, 60, "Practice", 26, (255, 112, 150), (0, 0))
+        button_play = Button(200, 60, "Play online", 26, (255, 112, 150), (0, 0))
+        button_customize = Button(200, 60, "Customize", 26, (255, 112, 150), (0, 0))
+        button_practice = Button(200, 60, "Practice", 26, (255, 112, 150), (0, 0))
         buttons = [button_customize, button_play, button_practice]
         selected_button = Counter(len(buttons), 0)
 
         while True:
             # blit
             self.screen.fill((255, 255, 255))
-            draw_button_list(buttons, selected_button, self.screen,
-                             space=250, pos=(150, 500))
+            draw_button_list(
+                buttons, selected_button, self.screen, space=250, pos=(150, 500)
+            )
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -60,7 +58,6 @@ class Game_manager:
         # Main loop for the Pygame window
         running = True
         while running:
-
             # update from server
             self.screen.fill((255, 255, 255))
             selected_player = player1
@@ -107,12 +104,16 @@ class Game_manager:
             pygame.display.update()
 
     def load_online(self):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
         loading_text = pygame.font.SysFont("arial", 40).render(
-            "Connecting to server...", True, (255, 255, 255))
+            "Connecting to server...", True, (255, 255, 255)
+        )
 
         while True:
+            try:
+                client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            except:
+                pass
+
             self.screen.fill((0, 0, 0))
             self.screen.blit(loading_text, (200, 300))
 
@@ -121,14 +122,14 @@ class Game_manager:
                     pygame.quit()
                     sys.exit()
 
+            pygame.display.update()
+
             try:
-                client_socket.connect(('localhost', 12345))
+                client_socket.connect(("127.0.0.1", 12345))
             except:
-                hello = ""
+                continue
             else:
                 break
-
-            pygame.display.update()
 
         # - -- -- - - - - -ter succesfull connection - -- -- - - - - - - -
         sprites = []
@@ -137,8 +138,8 @@ class Game_manager:
         sprites.append(player1)
         sprites.append(player2)
 
-        # Main loop for the Pygame window
         running = True
+        # Main loop for the Pygame window
         while running:
             # update from server
             data = client_socket.recv(4096)
@@ -147,8 +148,11 @@ class Game_manager:
             self.screen.fill(decoded_data["color"])
             player1.x = decoded_data["player1_data"]["x"]
             player1.y = decoded_data["player1_data"]["y"]
+            player1.turn(decoded_data["player1_data"]["direction"])
+
             player2.x = decoded_data["player2_data"]["x"]
             player2.y = decoded_data["player2_data"]["y"]
+            player2.turn(decoded_data["player2_data"]["direction"])
 
             selected_player = player1
             selected_data = "player1_data"
@@ -215,6 +219,8 @@ class Game_manager:
             # send updates to server
             decoded_data[selected_data]["x"] = selected_player.x
             decoded_data[selected_data]["y"] = selected_player.y
+            decoded_data[selected_data]["direction"] = selected_player.direction
+            decoded_data[selected_data]["timestamp"] = pygame.time.get_ticks()
 
             package = pickle.dumps(decoded_data)
             client_socket.sendall(package)

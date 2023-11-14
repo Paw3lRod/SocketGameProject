@@ -4,9 +4,12 @@ import pickle
 import pygame
 from player import Player
 
+# ticks
+last_processed_input = {"1": 0, "2": 0}
+
 # Create the server socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('0.0.0.0', 12345))
+server_socket.bind(("0.0.0.0", 12345))
 server_socket.listen()
 
 # Initialize Pygame
@@ -18,8 +21,13 @@ while len(clients) < 2:
     client_socket, client_address = server_socket.accept()
     clients.append(client_socket)
 
-main_data = {"user": "", "color": (255, 255, 255), "pressed_key": "",
-             "player1_data": {"x": 0, "y": 0}, "player2_data": {"x": 0, "y": 0}}
+main_data = {
+    "user": "",
+    "color": (255, 255, 255),
+    "pressed_key": "",
+    "player1_data": {"x": 0, "y": 0, "direction": "down", "timestamp": 0},
+    "player2_data": {"x": 0, "y": 0, "direction": "down", "timestamp": 0},
+}
 package = pickle.dumps(main_data)
 
 for client_socket in clients:
@@ -40,11 +48,24 @@ while running:
     for i in range(len(decoded_data)):
         # makes player1 control player1 and player2 control player2
         if i == 0:
-            main_data["player1_data"]["x"] = decoded_data[i]["player1_data"]["x"]
-            main_data["player1_data"]["y"] = decoded_data[i]["player1_data"]["y"]
+            if decoded_data[i]["player1_data"]["timestamp"] > last_processed_input["1"]:
+                main_data["player1_data"]["x"] = decoded_data[i]["player1_data"]["x"]
+                main_data["player1_data"]["y"] = decoded_data[i]["player1_data"]["y"]
+                main_data["player1_data"]["direction"] = decoded_data[i][
+                    "player1_data"
+                ]["direction"]
+
+                last_processed_input["1"] = decoded_data[i]["player1_data"]["timestamp"]
+
         elif i == 1:
-            main_data["player2_data"]["x"] = decoded_data[i]["player2_data"]["x"]
-            main_data["player2_data"]["y"] = decoded_data[i]["player2_data"]["y"]
+            if decoded_data[i]["player2_data"]["timestamp"] > last_processed_input["2"]:
+                main_data["player2_data"]["x"] = decoded_data[i]["player2_data"]["x"]
+                main_data["player2_data"]["y"] = decoded_data[i]["player2_data"]["y"]
+                main_data["player2_data"]["direction"] = decoded_data[i][
+                    "player2_data"
+                ]["direction"]
+
+                last_processed_input["2"] = decoded_data[i]["player2_data"]["timestamp"]
 
     # send updates to clients
     player1_data = {}
