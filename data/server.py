@@ -25,8 +25,16 @@ main_data = {
     "user": "",
     "color": (255, 255, 255),
     "pressed_key": "",
-    "player1_data": {"x": 0, "y": 0, "direction": "down", "timestamp": 0},
-    "player2_data": {"x": 0, "y": 0, "direction": "down", "timestamp": 0},
+    "player1_data": {
+        "key_downs": [],
+        "key_ups": [],
+        "timestamp": 0,
+    },
+    "player2_data": {
+        "key_downs": [],
+        "key_ups": [],
+        "timestamp": 0,
+    },
 }
 package = pickle.dumps(main_data)
 
@@ -49,15 +57,12 @@ while running:
         nr = str(i + 1)
 
         if decoded_data[i][f"player{nr}_data"]["timestamp"] > last_processed_input[nr]:
-            main_data[f"player{nr}_data"]["x"] = decoded_data[i][f"player{nr}_data"][
-                "x"
-            ]
-            main_data[f"player{nr}_data"]["y"] = decoded_data[i][f"player{nr}_data"][
-                "y"
-            ]
-            main_data[f"player{nr}_data"]["direction"] = decoded_data[i][
+            main_data[f"player{nr}_data"]["key_downs"] = decoded_data[i][
                 f"player{nr}_data"
-            ]["direction"]
+            ]["key_downs"]
+            main_data[f"player{nr}_data"]["key_ups"] = decoded_data[i][
+                f"player{nr}_data"
+            ]["key_ups"]
 
             last_processed_input[nr] = decoded_data[i][f"player{nr}_data"]["timestamp"]
 

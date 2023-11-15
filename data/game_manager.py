@@ -51,7 +51,7 @@ class Game_manager:
         sprites = []
         player1 = Player("blue", 0, 0)
         player2 = Player("red", 420, 100)
-        player1.change_velocity(1)
+        player1.change_velocity(0.75)
         sprites.append(player1)
         sprites.append(player2)
 
@@ -91,13 +91,6 @@ class Game_manager:
                     if event.key == pygame.K_LEFT:
                         selected_player.move(-1, 0, "stop")
 
-                # diagonal direction control
-                keys = pygame.key.get_pressed()
-                if not keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
-                    selected_player.vel_y = 0
-                if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-                    selected_player.vel_x = 0
-
             player1.update()
             player2.update()
 
@@ -107,7 +100,6 @@ class Game_manager:
         loading_text = pygame.font.SysFont("arial", 40).render(
             "Connecting to server...", True, (255, 255, 255)
         )
-
 
         while True:
             try:
@@ -136,6 +128,7 @@ class Game_manager:
         sprites = []
         player1 = Player("jeremy", 0, 0)
         player2 = Player("jeremy", 0, 0)
+        players = [player1, player2]
         sprites.append(player1)
         sprites.append(player2)
 
@@ -147,14 +140,6 @@ class Game_manager:
             decoded_data = pickle.loads(data)
 
             self.screen.fill(decoded_data["color"])
-            player1.x = decoded_data["player1_data"]["x"]
-            player1.y = decoded_data["player1_data"]["y"]
-            player1.turn(decoded_data["player1_data"]["direction"])
-
-            player2.x = decoded_data["player2_data"]["x"]
-            player2.y = decoded_data["player2_data"]["y"]
-            player2.turn(decoded_data["player2_data"]["direction"])
-
             selected_player = player1
             selected_data = "player1_data"
 
@@ -162,55 +147,61 @@ class Game_manager:
                 selected_player = player2
                 selected_data = "player2_data"
 
+            # perform actions from server
+            for i in range(2):
+                player = players[i]
+                nr = i + 1
+
+                # key_downs
+                if "up" in decoded_data[f"player{nr}_data"]["key_downs"]:
+                    player.move(0, -1, "start")
+                if "down" in decoded_data[f"player{nr}_data"]["key_downs"]:
+                    player.move(0, 1, "start")
+                if "right" in decoded_data[f"player{nr}_data"]["key_downs"]:
+                    player.move(1, 0, "start")
+                if "left" in decoded_data[f"player{nr}_data"]["key_downs"]:
+                    player.move(-1, 0, "start")
+
+                # key_ups
+                if "up" in decoded_data[f"player{nr}_data"]["key_ups"]:
+                    player.move(0, -1, "stop")
+                if "down" in decoded_data[f"player{nr}_data"]["key_ups"]:
+                    player.move(0, 1, "stop")
+                if "right" in decoded_data[f"player{nr}_data"]["key_ups"]:
+                    player.move(1, 0, "stop")
+                if "left" in decoded_data[f"player{nr}_data"]["key_ups"]:
+                    player.move(-1, 0, "stop")
+
             # blit sprites
             for sprite in sprites:
                 self.screen.blit(sprite.image, (sprite.x, sprite.y))
+
+            # inputs
+            key_downs = []
+            key_ups = []
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
 
-                # inputs
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
-                        selected_player.vel_y += -selected_player.velocity
-                        selected_player.turn("up")
+                        key_downs.append("up")
                     if event.key == pygame.K_DOWN:
-                        selected_player.vel_y += selected_player.velocity
-                        selected_player.turn("down")
+                        key_downs.append("down")
                     if event.key == pygame.K_RIGHT:
-                        selected_player.vel_x += selected_player.velocity
-                        selected_player.turn("right")
+                        key_downs.append("right")
                     if event.key == pygame.K_LEFT:
-                        selected_player.vel_x += -selected_player.velocity
-                        selected_player.turn("left")
+                        key_downs.append("left")
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_UP:
-                        selected_player.vel_y += selected_player.velocity
+                        key_ups.append("up")
                     if event.key == pygame.K_DOWN:
-                        selected_player.vel_y += -selected_player.velocity
+                        key_ups.append("down")
                     if event.key == pygame.K_RIGHT:
-                        selected_player.vel_x += -selected_player.velocity
+                        key_ups.append("right")
                     if event.key == pygame.K_LEFT:
-                        selected_player.vel_x += selected_player.velocity
-
-                # diagonal direction control
-                keys = pygame.key.get_pressed()
-                if keys[pygame.K_UP]:
-                    if keys[pygame.K_RIGHT]:
-                        selected_player.turn("upright")
-                    elif keys[pygame.K_LEFT]:
-                        selected_player.turn("upleft")
-                elif keys[pygame.K_DOWN]:
-                    if keys[pygame.K_RIGHT]:
-                        selected_player.turn("downright")
-                    elif keys[pygame.K_LEFT]:
-                        selected_player.turn("downleft")
-                # stop player from moving when no keys are pressed
-                else:
-                    selected_player.vel_y = 0
-                if not keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-                    selected_player.vel_x = 0
+                        key_ups.append("left")
 
             player1.update()
             player2.update()
@@ -218,9 +209,8 @@ class Game_manager:
             pygame.display.update()
 
             # send updates to server
-            decoded_data[selected_data]["x"] = selected_player.x
-            decoded_data[selected_data]["y"] = selected_player.y
-            decoded_data[selected_data]["direction"] = selected_player.direction
+            decoded_data[selected_data]["key_downs"] = key_downs
+            decoded_data[selected_data]["key_ups"] = key_ups
             decoded_data[selected_data]["timestamp"] = pygame.time.get_ticks()
 
             package = pickle.dumps(decoded_data)

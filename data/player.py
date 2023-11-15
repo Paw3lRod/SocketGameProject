@@ -88,33 +88,28 @@ class Player:
         self.direction = direction
 
     def move(self, vel_x, vel_y, startstop):
+        # adjust speed for diagonal movement
         if startstop == "start":
             self.vel_x += (vel_x) * self.velocity
             self.vel_y += (vel_y) * self.velocity
         else:
-            self.vel_x -= (vel_x) * self.velocity
-            self.vel_y -= (vel_y) * self.velocity
-
-        # adjust speed for diagonal movement
-        if self.vel_x != 0 and self.vel_y != 0:
-            if self.vel_x < 0:
-                self.vel_x = -math.sqrt((self.velocity**2) / 2)
+            # When stopping a diagonal movement, only subtract the velocity for that direction
+            if vel_x != 0 and vel_y != 0:
+                self.vel_x -= (vel_x) * self.velocity
+                self.vel_y -= (vel_y) * self.velocity
             else:
-                self.vel_x = math.sqrt((self.velocity**2) / 2)
-            if self.vel_y < 0:
-                self.vel_y = -math.sqrt((self.velocity**2) / 2)
-            else:
-                self.vel_y = math.sqrt((self.velocity**2) / 2)
+                self.vel_x -= (vel_x) * self.velocity
+                self.vel_y -= (vel_y) * self.velocity
 
         # check if velocity is too high
         if self.vel_x > self.velocity:
             self.vel_x = self.velocity
         elif self.vel_x < -self.velocity:
-            self.vel_x = self.velocity
+            self.vel_x = -self.velocity
         if self.vel_y > self.velocity:
             self.vel_y = self.velocity
         elif self.vel_y < -self.velocity:
-            self.vel_y = self.velocity
+            self.vel_y = -self.velocity
 
     def change_velocity(self, new_velocity):
         self.velocity = new_velocity
