@@ -46,26 +46,20 @@ while running:
             decoded_data.append(pickle.loads(data))
 
     for i in range(len(decoded_data)):
-        # makes player1 control player1 and player2 control player2
-        if i == 0:
-            if decoded_data[i]["player1_data"]["timestamp"] > last_processed_input["1"]:
-                main_data["player1_data"]["x"] = decoded_data[i]["player1_data"]["x"]
-                main_data["player1_data"]["y"] = decoded_data[i]["player1_data"]["y"]
-                main_data["player1_data"]["direction"] = decoded_data[i][
-                    "player1_data"
-                ]["direction"]
+        nr = str(i + 1)
 
-                last_processed_input["1"] = decoded_data[i]["player1_data"]["timestamp"]
+        if decoded_data[i][f"player{nr}_data"]["timestamp"] > last_processed_input[nr]:
+            main_data[f"player{nr}_data"]["x"] = decoded_data[i][f"player{nr}_data"][
+                "x"
+            ]
+            main_data[f"player{nr}_data"]["y"] = decoded_data[i][f"player{nr}_data"][
+                "y"
+            ]
+            main_data[f"player{nr}_data"]["direction"] = decoded_data[i][
+                f"player{nr}_data"
+            ]["direction"]
 
-        elif i == 1:
-            if decoded_data[i]["player2_data"]["timestamp"] > last_processed_input["2"]:
-                main_data["player2_data"]["x"] = decoded_data[i]["player2_data"]["x"]
-                main_data["player2_data"]["y"] = decoded_data[i]["player2_data"]["y"]
-                main_data["player2_data"]["direction"] = decoded_data[i][
-                    "player2_data"
-                ]["direction"]
-
-                last_processed_input["2"] = decoded_data[i]["player2_data"]["timestamp"]
+            last_processed_input[nr] = decoded_data[i][f"player{nr}_data"]["timestamp"]
 
     # send updates to clients
     player1_data = {}

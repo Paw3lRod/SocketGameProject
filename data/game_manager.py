@@ -108,6 +108,7 @@ class Game_manager:
             "Connecting to server...", True, (255, 255, 255)
         )
 
+
         while True:
             try:
                 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
