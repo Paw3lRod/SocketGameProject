@@ -5,10 +5,12 @@ pygame.init()
 
 
 class Player:
-    def __init__(self, selected_image, x, y):
+    def __init__(self, selected_image, x, y, weapon=None):
         self.image_file = selected_image
         self.image = pygame.image.load("data/images/" + selected_image + ".png")
         self.image = pygame.transform.scale(self.image, (115, 115))
+        self.weapon = weapon
+
         self.x = x
         self.y = y
         self.vel_x = 0
@@ -141,3 +143,12 @@ class Player:
                 self.image = pygame.transform.scale(self.image, (115, 115))
                 self.hittimer = 0
                 self.hit = False
+
+    def basic_attack(self):
+        self.weapon.attack = True
+
+    def display(self, screen):
+        if self.weapon:
+            self.weapon.display(screen)
+
+        screen.blit(self.image, (self.x, self.y))

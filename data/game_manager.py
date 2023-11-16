@@ -6,6 +6,7 @@ from data.button import draw_button_list
 from data.button import Button
 from data.counter import Counter
 from data.player import Player
+from data.weapon import Katana
 
 
 class Game_manager:
@@ -50,10 +51,15 @@ class Game_manager:
     def practice_field(self):
         sprites = []
         player1 = Player("blue", 0, 0)
-        player2 = Player("red", 420, 100)
         player1.change_velocity(0.75)
+
+        player2 = Player("red", 420, 100)
+
         sprites.append(player1)
         sprites.append(player2)
+
+        # loadouts
+        player1.weapon = Katana(user=player1, target=player2)
 
         # Main loop for the Pygame window
         running = True
@@ -64,7 +70,7 @@ class Game_manager:
 
             # blit sprites
             for sprite in sprites:
-                self.screen.blit(sprite.image, (sprite.x, sprite.y))
+                sprite.display(self.screen)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -81,6 +87,9 @@ class Game_manager:
                         selected_player.move(1, 0, "start")
                     if event.key == pygame.K_LEFT:
                         selected_player.move(-1, 0, "start")
+
+                    if event.key == pygame.K_SPACE:
+                        selected_player.basic_attack()
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_UP:
                         selected_player.move(0, -1, "stop")
@@ -132,6 +141,9 @@ class Game_manager:
         sprites.append(player1)
         sprites.append(player2)
 
+        # loadouts
+        player1.weapon = Katana(user=player1, target=player2)
+
         running = True
         # Main loop for the Pygame window
         while running:
@@ -174,7 +186,7 @@ class Game_manager:
 
             # blit sprites
             for sprite in sprites:
-                self.screen.blit(sprite.image, (sprite.x, sprite.y))
+                sprite.display(self.screen)
 
             # inputs
             key_downs = []
